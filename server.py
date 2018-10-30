@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 """
-Class (and main program) for echo server in UDP simple
+Class (and main program) for echo register server in UDP simple
 """
 
 import socketserver
@@ -9,44 +9,48 @@ import sys
 import time
 import json
 
+
 class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     """
-    Echo server class
+    Echo register server class
     """
-    dicc_Users = {}
+    dict_Users = {}
+
     def add_users(self, sip_address, expires_time):
         """
-        rescribir esto
+        Add users to the dictionary
         """
-        self.dicc_Users[sip_address] = self.client_address[0] + ' Expires: ' + expires_time
+        self.dict_Users[sip_address] = self.client_address[0] + ' Expires: ' + expires_time
+        self.register2json()
         self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
 
     def del_user(self, sip_address):
         """
-        rescribir esto
+        Delete users of the dictionary
         """
         try:
-            del self.dicc_Users[sip_address]
+            del self.dict_Users[sip_address]
+            self.register2json()
             self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
         except KeyError:
             self.wfile.write(b"SIP/2.0 404 User Not Found\r\n\r\n")
 
     def check_expires(self):
         """
-        rescribir esto
+        Check if the users have expired
+        Delete them of the dictionary if they are expired
         """
-        users_list = list(self.dicc_Users)
-        for users in users_list:
-            expires_time = self.dicc_Users[1]
-            current_time = time.strftime('%Y-%m-%d %H:%M:%S',
-            time.gmtime(time.time()))
+        users_list = list(self.dict_Users)
+        for user in users_list:
+            expires_time = self.dict_Users[user].split(': ')[1]
+            current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time.time()))
             if expires_time < current_time:
-                self.del_user(self.dicc_Users[0])
-                self.register2json()
+                del self.dict_Users[user]
 
     def handle(self):
         """
-        rescribir esto
+        Handle method of the server class
+        (all requests will be handled by this method)
         """
         self.json2register()
         self.check_expires()
@@ -64,34 +68,36 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                     expires_time = float(received_mess[1])
                     if expires_time > 0:
                         expires_time = expires_time + time.time()
-                        expires_time = time.strftime('%Y-%m-%d %H:%M:%S',
-                                        time.gmtime(expires_time))
+                        expires_time = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(expires_time))
                         self.add_users(sip_address, expires_time)
                     elif expires_time == 0:
                         self.del_user(sip_address)
-                    self.register2json()
                 else:
                     self.wfile.write(b"SIP/2.0 400 Bad Request\r\n\r\n")
 
     def register2json(self):
         """
-        rescribir esto
+        Dump the data of users in a json file
         """
+        self.check_expires()
         with open('registered.json', 'w') as json_file:
-            json.dump(self.dicc_Users, json_file, indent=4)
+            json.dump(self.dict_Users, json_file, indent=4)
 
     def json2register(self):
         """
-        rescribir esto
+        if exist a json file with data of users (registered.json)
+        copy the data of users in the dictionary
         """
         try:
             with open('registered.json', 'r') as json_file:
-                self.dicc_Users = json.load(json_file)
+                self.dict_Users = json.load(json_file)
         except FileNotFoundError:
             pass
 
 
 if __name__ == "__main__":
+    # Listens at localhost ('') in a port defined by the user
+    # and calls the SIPRegisterHandler class to manage the request
     try:
         PORT = int(sys.argv[2])
         serv = socketserver.UDPServer(('', PORT), SIPRegisterHandler)
