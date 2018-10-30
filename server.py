@@ -20,7 +20,6 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         """
         self.dicc_Users[sip_address] = self.client_address[0] + ' Expires: ' + expires_time
         self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
-        print(self.dicc_Users)
 
     def del_user(self, sip_address):
         """
@@ -29,7 +28,6 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         try:
             del self.dicc_Users[sip_address]
             self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
-            print(self.dicc_Users)
         except KeyError:
             self.wfile.write(b"SIP/2.0 404 User Not Found\r\n\r\n")
 
