@@ -20,7 +20,8 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         """
         Add users to the dictionary
         """
-        self.dict_Users[sip_address] = self.client_address[0] + ' Expires: ' + expires_time
+        self.dict_Users[sip_address] = self.client_address[0] + ' Expires: '\
+                                                              + expires_time
         self.register2json()
         self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
 
@@ -43,7 +44,8 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         users_list = list(self.dict_Users)
         for user in users_list:
             expires_time = self.dict_Users[user].split(': ')[1]
-            current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(time.time()))
+            current_time = time.strftime('%Y-%m-%d %H:%M:%S',
+                                         time.gmtime(time.time()))
             if expires_time < current_time:
                 del self.dict_Users[user]
 
@@ -68,7 +70,8 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                     expires_time = float(received_mess[1])
                     if expires_time > 0:
                         expires_time = expires_time + time.time()
-                        expires_time = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(expires_time))
+                        expires_time = time.strftime('%Y-%m-%d %H:%M:%S',
+                                                     time.gmtime(expires_time))
                         self.add_users(sip_address, expires_time)
                     elif expires_time == 0:
                         self.del_user(sip_address)
