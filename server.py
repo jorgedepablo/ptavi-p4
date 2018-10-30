@@ -33,7 +33,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         except KeyError:
             self.wfile.write(b"SIP/2.0 404 User Not Found\r\n\r\n")
 
-    def expires(self):
+    def check_expires(self):
         """
         rescribir esto
         """
@@ -50,6 +50,8 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         """
         rescribir esto
         """
+        self.json2register()
+        self.check_expires()
         received_mess = []
         for index, line in enumerate(self.rfile):
             received_mess = line.decode('utf-8')
@@ -67,10 +69,9 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                         expires_time = time.strftime('%Y-%m-%d %H:%M:%S',
                                         time.gmtime(expires_time))
                         self.add_users(sip_address, expires_time)
-                        self.register2json()
                     elif expires_time == 0:
                         self.del_user(sip_address)
-                        self.register2json()
+                    self.register2json()
                 else:
                     self.wfile.write(b"SIP/2.0 400 Bad Request\r\n\r\n")
 
@@ -80,6 +81,16 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         """
         with open('registered.json', 'w') as json_file:
             json.dump(self.dicc_Users, json_file, indent=4)
+
+    def json2register(self):
+        """
+        rescribir esto
+        """
+        try:
+            with open('registered.json', 'r') as json_file:
+                self.dicc_Users = json.load(json_file)
+        except FileNotFoundError:
+            pass
 
 
 if __name__ == "__main__":
