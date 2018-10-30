@@ -13,6 +13,19 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     Echo server class
     """
     dicc_Users = {}
+    def add_users(self, sip_address, expires_time):
+        self.dicc_Users[sip_address] = self.client_address[0] + ' Expires: ' + expires_time
+        self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
+        print(self.dicc_Users)
+
+    def del_user(self, sip_address):
+        try:
+            del self.dicc_Users[sip_address]
+            self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
+            print(self.dicc_Users)
+        except KeyError:
+            self.wfile.write(b"SIP/2.0 404 User Not Found\r\n\r\n")
+
     def handle(self):
         """
         handle method of the server class
@@ -21,17 +34,20 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
         received_mess = []
         for line in self.rfile:
             received_mess = line.decode('utf-8')
-            #received_mess.append(line.decode('utf-8'))
             received_mess = ''.join(received_mess).split()
-
             if received_mess:
-                #print(received_mess)
                 if received_mess[0] == 'REGISTER':
-                    print(received_mess)
                     sip_address = received_mess[1].split(':')[1]
-                    expires_time = received_mess
-                    self.dicc_Users[sip_address] = self.client_address[0]
-                    self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
+                elif received_mess[0] == 'Expires:':
+                    expires_time = float(received_mess[1])
+                    if expires_time > 0:
+                        expires_time = expires_time + time.time()
+                        expires_time = time.strftime('%Y-%m-%d %H:%M:%S',
+                                        time.gmtime(expires_time))
+                        self.add_users(sip_address, expires_time)
+                    elif expires_time == 0:
+                        self.del_user(sip_address)
+
 
 
 if __name__ == "__main__":

@@ -14,10 +14,10 @@ try:
     USER = sys.argv[4]
     EXPIRES = int(sys.argv[5])
 except IndexError or ValueError:
-    sys.exit('Usage: python3 client.py "server" "port" register "user-name"')
+    sys.exit('Usage: python3 client.py "server" "port" register "user-name" "expires time"')
 
 def register():
-    REGISTER = 'REGISTER sip:'+ USER + ' SIP/2.0\r\n' + 'Expires: ' + str(EXPIRES) 
+    REGISTER = 'REGISTER sip:'+ USER + ' SIP/2.0\r\n' + 'Expires: ' + str(EXPIRES)
     my_socket.send(bytes(REGISTER, 'utf-8') + b'\r\n\r\n')
 
 # Create the socket, config it and connect it to a server/port
