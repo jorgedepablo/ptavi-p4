@@ -1,13 +1,11 @@
-#!/usr/bin/python3
+# !/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-Client UDP implement a socket to a register server
-"""
+"""Client UDP implement a socket to a register server."""
 
 import socket
 import sys
 
-# Define constants. IP address, port, sip address and expire time
+# Define constants. IP address, port, sip address and expire time.
 try:
     SERVER = sys.argv[1]
     PORT = int(sys.argv[2])

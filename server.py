@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-Class (and main program) for echo register server in UDP simple
-"""
+"""Class (and main program) for echo register server in UDP simple."""
 
 import socketserver
 import sys
@@ -11,24 +9,19 @@ import json
 
 
 class SIPRegisterHandler(socketserver.DatagramRequestHandler):
-    """
-    Echo register server class
-    """
+    """Echo register server class."""
+
     dict_Users = {}
 
     def add_users(self, sip_address, expires_time):
-        """
-        Add users to the dictionary
-        """
+        """Add users to the dictionary."""
         self.dict_Users[sip_address] = self.client_address[0] + ' Expires: '\
                                                               + expires_time
         self.register2json()
         self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
 
     def del_user(self, sip_address):
-        """
-        Delete users of the dictionary
-        """
+        """Delete users of the dictionary."""
         try:
             del self.dict_Users[sip_address]
             self.register2json()
@@ -37,10 +30,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             self.wfile.write(b"SIP/2.0 404 User Not Found\r\n\r\n")
 
     def check_expires(self):
-        """
-        Check if the users have expired
-        Delete them of the dictionary if they are expired
-        """
+        """Check if the users have expired, delete them of the dictionary."""
         users_list = list(self.dict_Users)
         for user in users_list:
             expires_time = self.dict_Users[user].split(': ')[1]
@@ -50,10 +40,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                 del self.dict_Users[user]
 
     def handle(self):
-        """
-        Handle method of the server class
-        (all requests will be handled by this method)
-        """
+        """Handle method of the server class."""
         self.json2register()
         self.check_expires()
         received_mess = []
@@ -79,18 +66,13 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                     self.wfile.write(b"SIP/2.0 400 Bad Request\r\n\r\n")
 
     def register2json(self):
-        """
-        Dump the data of users in a json file
-        """
+        """Dump the data of users in a json file."""
         self.check_expires()
         with open('registered.json', 'w') as json_file:
             json.dump(self.dict_Users, json_file, indent=4)
 
     def json2register(self):
-        """
-        if exist a json file with data of users (registered.json)
-        copy the data of users in the dictionary
-        """
+        """if exist a json file copy the data of users in the dictionary."""
         try:
             with open('registered.json', 'r') as json_file:
                 self.dict_Users = json.load(json_file)
@@ -105,7 +87,7 @@ if __name__ == "__main__":
         PORT = int(sys.argv[2])
         serv = socketserver.UDPServer(('', PORT), SIPRegisterHandler)
     except IndexError or ValueError:
-        sys.exit('Usage: python3 server.py "port"')
+        sys.exit('Usage: python3 server.py "server" "port"')
 
     print('Runnig echo server UDP...')
     try:
