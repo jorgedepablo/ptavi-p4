@@ -12,7 +12,7 @@ try:
     USER = sys.argv[4]
     EXPIRES = int(sys.argv[5])
 except IndexError or ValueError:
-    sys.exit('Usage: python3 client.py "server" "port2" register "user-name" \
+    sys.exit('Usage: python3 client.py "server" "port" register "user-name" \
               "expires time"')
 
 # Create the socket, configure it and attach it to server/port

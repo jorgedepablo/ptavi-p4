@@ -84,10 +84,10 @@ if __name__ == "__main__":
     # Listens at localhost ('') in a port defined by the user
     # and calls the SIPRegisterHandler class to manage the request
     try:
-        PORT = int(sys.argv[2])
+        PORT = int(sys.argv[1])
         serv = socketserver.UDPServer(('', PORT), SIPRegisterHandler)
     except IndexError or ValueError:
-        sys.exit('Usage: python3 server.py "server" "port"')
+        sys.exit('Usage: python3 server.py "port"')
 
     print('Runnig echo server UDP...')
     try:
