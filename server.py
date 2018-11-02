@@ -13,7 +13,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
     dict_Users = {}
 
-    def add_users(self, sip_address, expires_time):
+    def add_user(self, sip_address, expires_time):
         """Add users to the dictionary."""
         self.dict_Users[sip_address] = self.client_address[0] + ' Expires: '\
                                                               + expires_time
@@ -27,7 +27,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             self.register2json()
             self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
         except KeyError:
-            self.wfile.write(b"SIP/2.0 404 User Not Found\r\n\r\n")
+            self.wfile.write(b'SIP/2.0 404 User Not Found\r\n\r\n')
 
     def check_expires(self):
         """Check if the users have expired, delete them of the dictionary."""
@@ -51,7 +51,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                 if received_mess[0] == 'REGISTER':
                     sip_address = received_mess[1].split(':')[1]
                 else:
-                    self.wfile.write(b"SIP/2.0 400 Bad Request\r\n\r\n")
+                    self.wfile.write(b'SIP/2.0 400 Bad Request\r\n\r\n')
             elif index == 1:
                 if received_mess[0] == 'Expires:':
                     expires_time = float(received_mess[1])
@@ -59,11 +59,11 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
                         expires_time = expires_time + time.time()
                         expires_time = time.strftime('%Y-%m-%d %H:%M:%S',
                                                      time.gmtime(expires_time))
-                        self.add_users(sip_address, expires_time)
+                        self.add_user(sip_address, expires_time)
                     elif expires_time == 0:
                         self.del_user(sip_address)
                 else:
-                    self.wfile.write(b"SIP/2.0 400 Bad Request\r\n\r\n")
+                    self.wfile.write(b'SIP/2.0 400 Bad Request\r\n\r\n')
 
     def register2json(self):
         """Dump the data of users in a json file."""
